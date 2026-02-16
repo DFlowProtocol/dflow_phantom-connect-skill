@@ -21,7 +21,7 @@ Map intent to flow:
 ## Core Concepts
 
 - **Outcome tokens**: YES/NO tokens are **Token-2022** mints.
-- **Market status** gates trading: only `active` markets accept trades.
+- **Market status** gates trading: only `active` markets accept trades. Always check `status` before submitting orders.
 - **Redemption** is available only when `status` is `determined` or `finalized` **and** `redemptionStatus` is `open`.
 - **Events vs Markets**:
   - **Event** = the real-world question (can contain one or more markets).
@@ -31,6 +31,26 @@ Map intent to flow:
 - **Settlement mints**: USDC (`EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`) and CASH (`CASHx9KJUStyftLFWGvEVf59SGeG9sh5FfcnZMVPCASH`). A market settles in whichever mint its outcome tokens belong to.
 - **No fractional contracts**: users cannot buy a fractional contract.
 - **Minimum order**: 0.01 USDC, but some markets require more because the smallest purchasable unit is one contract and the price determines the minimum.
+
+## Market Lifecycle
+
+Markets move through a fixed lifecycle. A market's `status` defines what actions are allowed.
+
+**`initialized` -> `active` -> `inactive` -> `closed` -> `determined` -> `finalized`**
+
+| Status        | Trading | Redemption           | Notes                                                  |
+| ------------- | ------- | -------------------- | ------------------------------------------------------ |
+| `initialized` | No      | No                   | Market exists but trading hasn't started               |
+| `active`      | **Yes** | No                   | Only status that allows trades                         |
+| `inactive`    | No      | No                   | Paused; can return to `active` or proceed to `closed`  |
+| `closed`      | No      | No                   | Trading ended; outcome not yet known                   |
+| `determined`  | No      | Check `redemptionStatus` | Outcome decided; redemption may be available       |
+| `finalized`   | No      | Check `redemptionStatus` | Final state; redemption available for winners       |
+
+Key rules:
+- `inactive` is a pause state. Markets can go back to `active` from `inactive`.
+- Always check `redemptionStatus` before submitting redemption requests — `determined` or `finalized` alone is not sufficient.
+- Filter markets by status using `GET /api/v1/markets?status=active`, `GET /api/v1/events?status=active`, or `GET /api/v1/series?status=active`.
 
 ## CORS: Browser Requests Are Blocked
 
@@ -86,6 +106,9 @@ Common endpoints:
 - `GET /api/v1/orderbook/{market_ticker}`
 - `GET /api/v1/orderbook/by-mint/{mint}`
 - `GET /api/v1/tags_by_categories`
+- `GET /api/v1/search?query={query}` — full-text search (see Search section)
+- `GET /api/v1/filters_by_sports` — sports-specific filters (see Sports Filters section)
+- `GET /api/v1/live_data` — REST-based live snapshots (see Live Data section)
 
 ## Categories and Tags (UI Filters)
 
@@ -105,6 +128,35 @@ Corner cases and best practices:
 - **Defensive filtering**: if the events response contains mixed categories,
   post-filter by `event.seriesTicker` against the series tickers you requested.
 
+## Search API
+
+Use `GET /api/v1/search?query={query}` for full-text search across events and markets. This is essential for building search bars.
+
+Fields searched on **events**: `id` (event ticker), `series_ticker`, `title`, `sub_title`.
+Fields searched on **markets**: `id` (market ticker), `event_ticker`, `title`, `yes_sub_title`, `no_sub_title`.
+
+**Not searched**: tags, categories, rules, competition fields, images, settlement sources.
+
+Matching rules:
+- Query is split on whitespace; **all tokens** must match.
+- Ticker fields match upper and lower case.
+- Text fields use full-text matching.
+- Special characters are escaped before search.
+
+## Sports Filters
+
+Use `GET /api/v1/filters_by_sports` to get filter options specific to sports prediction markets. Use this for building sports-specific category UIs.
+
+## Live Data (REST)
+
+For one-time snapshots of live market data (as opposed to streaming via WebSockets), use:
+
+- `GET /api/v1/live_data` — all live data
+- `GET /api/v1/live_data/by-mint/{mint_address}` — live data for a specific outcome mint
+- `GET /api/v1/live_data/by-event/{event_ticker}` — live data for a specific event
+
+Use these endpoints when you need a single snapshot rather than a continuous stream. For real-time streaming, use WebSockets instead.
+
 ## Real-Time Data (WebSockets)
 
 For live price tickers, trade feeds, and orderbook depth, see [dflow-websockets.md](dflow-websockets.md). WebSockets require a production API key and connect via `wss://` (same host as the production Metadata API, with `https` swapped for `wss`).
@@ -120,8 +172,16 @@ an **event ticker**, then choose the corresponding endpoint.
 
 Use candlesticks (not forecast history) for charting and user-facing price history. Forecast history is only for numerical events separated by percentiles and is better suited for research.
 
-Lifecycle order:
-`initialized -> active -> inactive -> closed -> determined -> finalized`
+## Prediction Market Slippage
+
+The `/order` endpoint supports a separate `predictionMarketSlippageBps` parameter specifically for the prediction market leg of a trade. This is distinct from the overall `slippageBps` parameter.
+
+- `slippageBps` controls slippage for the spot swap leg (e.g., SOL to USDC).
+- `predictionMarketSlippageBps` controls slippage for the outcome token leg (USDC to YES/NO token).
+
+Both accept an integer (basis points) or `"auto"`. If `predictionMarketSlippageBps` is not set, only `slippageBps` applies.
+
+When trading directly from a settlement mint (USDC/CASH) to an outcome token, there is no spot swap leg, so only `predictionMarketSlippageBps` matters.
 
 ## Input Mint and Latency
 
@@ -149,6 +209,48 @@ Use `/order` to trade any spot token into an outcome token. The Trade API:
 3. Sign and submit transaction.
 4. Poll `/order-status`.
 
+## Order Status Polling
+
+After submitting a prediction market trade, poll `GET /order-status?signature={signature}` to track execution.
+
+Query parameters:
+- `signature` (required): Base58 transaction signature from the `/order` response
+- `lastValidBlockHeight` (optional): Last valid block height for the transaction
+
+Response fields:
+
+| Field      | Type   | Description                                                      |
+| ---------- | ------ | ---------------------------------------------------------------- |
+| `status`   | string | `pending`, `open`, `pendingClose`, `closed`, `expired`, `failed` |
+| `fills`    | array  | Fill details (present if order has fills)                        |
+| `inAmount` | string | Total input amount filled (scaled integer)                       |
+| `outAmount`| string | Total output amount filled (scaled integer)                      |
+| `reverts`  | array  | Revert details (present if order has reverts)                    |
+
+Status meanings:
+- `pending` — Transaction submitted, not yet confirmed
+- `open` — Order is live on the book, waiting for fills
+- `pendingClose` — Order is closing, may have partial fills
+- `closed` — Order complete (check `fills` for execution details)
+- `expired` — Transaction expired (block height exceeded)
+- `failed` — Order failed to execute
+
+Poll while status is `open` or `pendingClose`. Use a 2-second interval between polls.
+
+```ts
+let status;
+do {
+  const res = await fetch(
+    `${API_BASE_URL}/order-status?signature=${signature}`,
+    { headers }
+  ).then((x) => x.json());
+  status = res.status;
+  if (status === "open" || status === "pendingClose") {
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+} while (status === "open" || status === "pendingClose");
+```
+
 ## Redemption Flow
 
 1. Fetch market by mint and confirm:
@@ -174,6 +276,29 @@ Use `/order` to trade any spot token into an outcome token. The Trade API:
 
 ## Fees and Sponsorship
 
+### DFlow Base Trading Fees
+
+DFlow charges base trading fees on all prediction market trades using a probability-weighted model:
+
+```
+fees = roundup(0.07 * c * p * (1 - p)) + (0.01 * c * p * (1 - p))
+```
+
+Where `p` is the fill price and `c` is the number of contracts. Fees are higher when outcomes are uncertain and lower as markets approach resolution.
+
+**Fee Tiers** (based on rolling 30-day outcome token volume):
+
+| Tier     | 30D Volume  | Taker Fee Scale | Maker Fee Scale |
+| -------- | ----------- | --------------- | --------------- |
+| Frost    | Below $50M  | 0.09            | 0.0225          |
+| Glacier  | $50-150M    | 0.0875          | 0.021875        |
+| Steel    | $150-300M   | 0.085           | 0.02125         |
+| Obsidian | Above $300M | 0.08            | 0.02            |
+
+Volume is tracked by API key across all applications using the Prediction Markets API.
+
+**Rebate Program**: Builders with over $100k in 30-day volume may qualify for rebates — the greater of 3% of gross fees or incremental rebates at VIP tiers (10-30% on incremental fees above $50M). Contact DFlow for eligibility.
+
 ### Platform Fees (Dynamic)
 
 For prediction market outcome token trades, use `platformFeeScale` instead of `platformFeeBps`. The fee is calculated as:
@@ -193,9 +318,64 @@ The `feeAccount` must be a settlement mint token account. Use `referralAccount` 
 
 ### Sponsorship
 
-- Use `sponsor` to cover user transaction fees and initialization.
-- Use `predictionMarketInitPayer` to cover market initialization only.
-- You can pre-initialize markets with `GET /prediction-market-init`.
+There are three distinct costs in prediction market trades that can be sponsored:
+
+1. **Transaction fees** — Solana transaction fees (paid by the fee payer)
+2. **ATA creation** — Creating Associated Token Accounts for outcome tokens
+3. **Market initialization** — One-time onchain cost (~0.02 SOL) to tokenize a market
+
+Sponsorship options:
+- `sponsor` — Covers all three: transaction fees, ATA creation, and market initialization. Simplest option for fully sponsored trades.
+- `predictionMarketInitPayer` — Covers only market initialization. Users still pay their own transaction fees. Use when users sign their own transactions but you don't want them paying the one-time init cost.
+
+### Pre-initializing Markets
+
+To avoid initialization costs during a user's first trade, pre-initialize markets using:
+
+`GET /prediction-market-init?payer={payer}&outcomeMint={outcomeMint}`
+
+- `payer` (required): Base58 address that pays for initialization
+- `outcomeMint` (required): Base58 mint address of either outcome token
+
+Returns a base64 transaction that the payer must sign and submit.
+
+### Account Rent and Reclamation
+
+Most of the cost users see comes from **Solana account rent**, not platform fees. Prediction market trades create multiple onchain accounts.
+
+**Winning positions**: When redeemed, the outcome token account is closed and rent is returned to the address specified by `outcomeAccountRentRecipient`.
+
+**Losing positions**: The outcome token is worthless. Users can burn the tokens and close the account to reclaim rent. Use `outcomeAccountRentRecipient` on the original `/order` call to control where rent goes.
+
+### Closing Empty Outcome Token Accounts
+
+After a losing position, burn remaining tokens and close the account to reclaim rent:
+
+```ts
+import { Connection, PublicKey, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { getAccount, createBurnInstruction, createCloseAccountInstruction } from "@solana/spl-token";
+
+const tokenAccount = new PublicKey("OUTCOME_TOKEN_ACCOUNT");
+const outcomeMint = new PublicKey("OUTCOME_TOKEN_MINT");
+const rentRecipient = new PublicKey("RENT_DESTINATION"); // user wallet or outcomeAccountRentRecipient
+
+const account = await getAccount(connection, tokenAccount);
+const instructions = [];
+
+if (account.amount > 0n) {
+  instructions.push(
+    createBurnInstruction(tokenAccount, outcomeMint, owner.publicKey, account.amount)
+  );
+}
+instructions.push(
+  createCloseAccountInstruction(tokenAccount, rentRecipient, owner.publicKey)
+);
+
+const tx = new Transaction().add(...instructions);
+await sendAndConfirmTransaction(connection, tx, [owner]);
+```
+
+This is a standard SPL Token operation — DFlow does not provide a dedicated endpoint for closing accounts.
 
 ## Error Handling
 
@@ -205,6 +385,21 @@ Common causes for prediction markets:
 1. **Wrong `outputMint`**: when selling an outcome token, `outputMint` must match the market's settlement mint (USDC or CASH). Check the `accounts` object in the market response.
 2. **Wrong `amount` units**: the `amount` is in atomic units (e.g., `8_000_000` for 8 USDC, not `8`).
 3. **No liquidity at top of book**: check the orderbook. If selling YES, check `yesBid`; if buying YES, check `yesAsk`. A `null` value means no counterparty.
+
+### Prediction Markets IDL Errors
+
+These onchain program errors may appear when transactions fail:
+
+| Code | Name                    | Meaning                                      |
+| ---- | ----------------------- | -------------------------------------------- |
+| 16   | MarketNotOpen           | Market is not in `active` status             |
+| 17   | MarketOutcomeDetermined | Outcome already decided, cannot trade        |
+| 18   | MarketNotDetermined     | Cannot redeem — outcome not yet decided      |
+| 19   | InvalidMarketStatus     | Action not allowed for current market status |
+| 64   | InvalidQuantity         | Invalid trade quantity                       |
+| 80   | OrderAlreadyFilled      | Order was already filled                     |
+| 83   | FillUnderproduced       | Output less than minimum expected            |
+| 84   | FillOverconsumed        | Input more than maximum expected             |
 
 ### Market Images
 

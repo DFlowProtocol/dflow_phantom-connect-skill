@@ -12,13 +12,14 @@ All Phantom Connect integrations require:
 
 ## Auth Providers
 
-| Provider     | Description                   | Requires appId |
-|--------------|-------------------------------|----------------|
-| `"injected"` | Phantom browser extension     | No             |
-| `"google"`   | Google OAuth (embedded wallet) | Yes           |
-| `"apple"`    | Apple ID (embedded wallet)    | Yes            |
+| Provider      | Description                     | Requires appId |
+| ------------- | ------------------------------- | -------------- |
+| `"injected"`  | Phantom browser extension       | No             |
+| `"google"`    | Google OAuth (embedded wallet)  | Yes            |
+| `"apple"`     | Apple ID (embedded wallet)      | Yes            |
+| `"deeplink"`  | Phantom mobile app via deeplink | Yes            |
 
-Use `"injected"` for extension-only flows (no appId needed). Add `"google"` and/or `"apple"` for social login (requires appId from Phantom Portal).
+Use `"injected"` for extension-only flows (no appId needed). Add `"google"` and/or `"apple"` for social login (requires appId from Phantom Portal). Add `"deeplink"` to support connecting to the Phantom mobile app on devices where the extension is not available.
 
 ## Installation
 
@@ -36,7 +37,7 @@ import { AddressType } from "@phantom/browser-sdk";
 
 <PhantomProvider
   config={{
-    providers: ["google", "apple", "injected"],
+    providers: ["google", "apple", "injected", "deeplink"],
     appId: "your-app-id",
     addressTypes: [AddressType.solana],
     authOptions: {
@@ -53,18 +54,18 @@ import { AddressType } from "@phantom/browser-sdk";
 
 ## Available Hooks
 
-| Hook | Purpose | Returns |
-|------|---------|---------|
-| `useModal` | Control connection modal | `{ open, close, isOpened }` |
-| `usePhantom` | Access wallet/user state | `{ isConnected, isLoading, user, wallet }` |
-| `useConnect` | Connect to wallet | `{ connect, isConnecting, isLoading, error }` |
-| `useAccounts` | Get wallet addresses | `WalletAddress[]` or `null` |
-| `useDisconnect` | Disconnect wallet | `{ disconnect, isDisconnecting }` |
-| `useSolana` | Solana operations | `{ solana, isAvailable }` |
-| `useAutoConfirm` | Auto-confirm (injected only) | `{ enable, disable, status }` |
-| `useDiscoveredWallets` | List injected wallets | `{ wallets, isLoading, error, refetch }` |
-| `useIsExtensionInstalled` | Check extension | `{ isLoading, isInstalled }` |
-| `useTheme` | Access current theme | `PhantomTheme` |
+| Hook                      | Purpose                      | Returns                                      |
+| ------------------------- | ---------------------------- | -------------------------------------------- |
+| `useModal`                | Control connection modal     | `{ open, close, isOpened }`                  |
+| `usePhantom`              | Access wallet/user state     | `{ isConnected, isLoading, user, wallet }`   |
+| `useConnect`              | Connect to wallet            | `{ connect, isConnecting, isLoading, error }`|
+| `useAccounts`             | Get wallet addresses         | `WalletAddress[]` or `null`                  |
+| `useDisconnect`           | Disconnect wallet            | `{ disconnect, isDisconnecting }`            |
+| `useSolana`               | Solana operations            | `{ solana, isAvailable }`                    |
+| `useAutoConfirm`          | Auto-confirm (injected only) | `{ enable, disable, status }`                |
+| `useDiscoveredWallets`    | List injected wallets        | `{ wallets, isLoading, error, refetch }`     |
+| `useIsExtensionInstalled` | Check extension              | `{ isLoading, isInstalled }`                 |
+| `useTheme`                | Access current theme         | `PhantomTheme`                               |
 
 ## Hook Examples
 
@@ -247,11 +248,11 @@ import { PhantomProvider, DebugLevel } from "@phantom/react-sdk";
 
 ## Supported Solana Networks
 
-| Network | Cluster |
-|---------|---------|
+| Network | Cluster      |
+| ------- | ------------ |
 | Mainnet | mainnet-beta |
-| Devnet | devnet |
-| Testnet | testnet |
+| Devnet  | devnet       |
+| Testnet | testnet      |
 
 ## Common Issues
 

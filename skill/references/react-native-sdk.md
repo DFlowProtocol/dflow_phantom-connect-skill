@@ -12,12 +12,13 @@ All Phantom Connect integrations require:
 
 ## Auth Providers
 
-| Provider     | Description                   | Requires appId |
-|--------------|-------------------------------|----------------|
-| `"google"`   | Google OAuth (embedded wallet) | Yes           |
-| `"apple"`    | Apple ID (embedded wallet)    | Yes            |
+| Provider     | Description                     | Requires appId |
+| ------------ | ------------------------------- | -------------- |
+| `"google"`   | Google OAuth (embedded wallet)  | Yes            |
+| `"apple"`    | Apple ID (embedded wallet)      | Yes            |
+| `"deeplink"` | Phantom mobile app via deeplink | Yes            |
 
-React Native does not support the `"injected"` provider (no browser extension on mobile). Use `"google"` and/or `"apple"` for social login.
+React Native does not support the `"injected"` provider (no browser extension on mobile). Use `"google"` and/or `"apple"` for social login, or `"deeplink"` to connect to the Phantom mobile app directly.
 
 ## Installation
 
@@ -94,14 +95,14 @@ export default function App() {
 
 ## Available Hooks
 
-| Hook | Purpose | Returns |
-|------|---------|---------|
-| `useModal` | Control connection modal | `{ open, close, isOpened }` |
-| `usePhantom` | Access wallet/user state | `{ isConnected, isLoading }` |
-| `useConnect` | Connect to wallet | `{ connect, isConnecting, error }` |
-| `useAccounts` | Get wallet addresses | `{ addresses, isConnected, walletId }` |
-| `useDisconnect` | Disconnect wallet | `{ disconnect, isDisconnecting }` |
-| `useSolana` | Solana operations | `{ solana, isAvailable }` |
+| Hook           | Purpose                  | Returns                                |
+| -------------- | ------------------------ | -------------------------------------- |
+| `useModal`     | Control connection modal | `{ open, close, isOpened }`            |
+| `usePhantom`   | Access wallet/user state | `{ isConnected, isLoading }`           |
+| `useConnect`   | Connect to wallet        | `{ connect, isConnecting, error }`     |
+| `useAccounts`  | Get wallet addresses     | `{ addresses, isConnected, walletId }` |
+| `useDisconnect`| Disconnect wallet        | `{ disconnect, isDisconnecting }`      |
+| `useSolana`    | Solana operations        | `{ solana, isAvailable }`              |
 
 ## Hook Examples
 
@@ -268,11 +269,11 @@ function SolanaActions() {
 
 ## Supported Solana Networks
 
-| Network | Cluster |
-|---------|---------|
+| Network | Cluster      |
+| ------- | ------------ |
 | Mainnet | mainnet-beta |
-| Devnet | devnet |
-| Testnet | testnet |
+| Devnet  | devnet       |
+| Testnet | testnet      |
 
 ## Common Issues
 
