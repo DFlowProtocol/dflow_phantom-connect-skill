@@ -5,7 +5,7 @@
 
 set -e
 
-SKILL_NAME="phantom-connect"
+SKILL_NAME="dflow-phantom-connect"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$SCRIPT_DIR/skill"
 
@@ -49,7 +49,7 @@ fi
 mkdir -p "$(dirname "$INSTALL_PATH")"
 
 # Copy skill files
-echo "Installing Phantom Connect skill to: $INSTALL_PATH"
+echo "Installing DFlow Phantom Connect skill to: $INSTALL_PATH"
 cp -r "$SKILL_DIR" "$INSTALL_PATH"
 
 echo "✅ Successfully installed!"

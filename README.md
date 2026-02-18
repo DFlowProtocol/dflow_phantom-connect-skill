@@ -20,17 +20,24 @@ Once installed, Claude automatically uses this skill when you ask about:
 
 ## Installation
 
-### Quick Install (Personal)
+### Claude.ai
+
+1. Download or clone this repo
+2. Zip the `skill/` folder
+3. Go to Claude.ai > Settings > Capabilities > Skills
+4. Click "Upload skill" and select the zip
+
+### Claude Code (Personal)
 
 ```bash
 git clone https://github.com/DFlowProtocol/dflow_phantom-connect-skill.git
-cp -r dflow_phantom-connect-skill/skill ~/.claude/skills/phantom-connect
+cp -r dflow_phantom-connect-skill/skill ~/.claude/skills/dflow-phantom-connect
 ```
 
-### Quick Install (Project)
+### Claude Code (Project)
 
 ```bash
-cp -r dflow_phantom-connect-skill/skill .claude/skills/phantom-connect
+cp -r dflow_phantom-connect-skill/skill .claude/skills/dflow-phantom-connect
 ```
 
 ### Using the Install Script
@@ -43,7 +50,7 @@ cp -r dflow_phantom-connect-skill/skill .claude/skills/phantom-connect
 ./install.sh --project
 
 # Install to custom location
-./install.sh --path /custom/path/skills/phantom-connect
+./install.sh --path /custom/path/skills/dflow-phantom-connect
 ```
 
 ## Skill Structure
@@ -116,7 +123,9 @@ This keeps context usage efficient.
 - [Phantom Portal](https://phantom.com/portal)
 - [SDK Examples](https://github.com/phantom/wallet-sdk/tree/main/examples)
 - [Phantom MCP Server](https://docs.phantom.com/resources/mcp-server)
+- [DFlow MCP Server](https://pond.dflow.net/mcp)
 - [DFlow Docs](https://pond.dflow.net/introduction)
+- [DFlow Cookbook](https://github.com/DFlowProtocol/cookbook)
 
 ## Contributing
 
