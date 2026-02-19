@@ -68,12 +68,14 @@ Before implementing, ask questions based on the domain:
 **For DFlow spot trades:**
 
 - Imperative or declarative? If unsure, suggest starting with imperative.
+- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/build/api-key.
 - Platform fees? If yes, what bps and what fee account?
 - Client environment? (web, mobile, backend, CLI)
 
 **For DFlow prediction markets:**
 
 - Settlement mint? (USDC or CASH — these are the only two)
+- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/build/api-key.
 - Platform fees? If yes, use `platformFeeScale` for dynamic fees.
 - Client environment? (web, mobile, backend, CLI)
 

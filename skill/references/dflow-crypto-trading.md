@@ -9,8 +9,9 @@ DFlow is a DEX aggregator that sources liquidity across venues on Solana. It sup
 Always ask these before giving implementation steps. Do not assume defaults.
 
 1. **Trade type**: Do you want **imperative** or **declarative** trades? If the user is unsure, suggest starting with imperative — it is simpler to integrate, executes synchronously, and is the right starting point for most builders.
-2. **Platform fees**: Do you want to charge platform fees? If yes, what bps and what fee account (wallet address) should receive them?
-3. **Client environment**: Are you building web, mobile, backend, or CLI?
+2. **Environment**: Are you building against **dev** or **production** endpoints? Dev endpoints work without an API key but are rate-limited and not suitable for production. Production requires an API key — apply at `pond.dflow.net/build/api-key`.
+3. **Platform fees**: Do you want to charge platform fees? If yes, what bps and what fee account (wallet address) should receive them?
+4. **Client environment**: Are you building web, mobile, backend, or CLI?
 
 ## Choosing a Trade Type (Imperative vs Declarative)
 
