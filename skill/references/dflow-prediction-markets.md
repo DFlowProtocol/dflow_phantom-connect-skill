@@ -9,8 +9,9 @@ Prediction market trades are always **imperative and async** (they use `/order` 
 Always ask these before giving implementation steps. Do not assume defaults.
 
 1. **Settlement mint**: Are you using **USDC** or **CASH**? These are the only two supported settlement mints.
-2. **Platform fees**: Do you want to charge platform fees? If yes, use `platformFeeScale` for dynamic fees (see Fees section).
-3. **Client environment**: Are you building web, mobile, backend, or CLI?
+2. **Environment**: Are you building against **dev** or **production** endpoints? Dev endpoints work without an API key but are rate-limited and not suitable for production. Production requires an API key — apply at `pond.dflow.net/build/api-key`.
+3. **Platform fees**: Do you want to charge platform fees? If yes, use `platformFeeScale` for dynamic fees (see Fees section).
+4. **Client environment**: Are you building web, mobile, backend, or CLI?
 
 Infer intent from the user's request. Do not ask them to choose a "trade type."
 Map intent to flow:
