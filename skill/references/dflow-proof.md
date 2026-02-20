@@ -4,91 +4,40 @@ Identity verification that links verified real-world identities to Solana wallet
 
 **Required for**: Prediction market outcome token buying and selling. See [dflow-prediction-markets.md](dflow-prediction-markets.md) for when to gate.
 
-**Also useful for**: Gated features, compliance-aware apps, onboarding flows, or any flow that needs verified wallet ownership. The same verify API and deep link work for any use case.
+**Also useful for**: Gated features, compliance-aware apps, onboarding flows, or any flow that needs verified wallet ownership.
 
-For full docs and integration timelines: https://pond.dflow.net/learn/proof
+For full docs, integration timelines, and API reference, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/learn/proof.
 
 ## Key Facts
 
 - **KYC provider**: Proof uses Stripe Identity under the hood.
 - **Cost**: There is no fee to use Proof.
-- **Geoblocking is still required**: KYC verifies user identity, but geoblocking is still required because prediction markets are not permitted in all jurisdictions. Use geoblocking to restrict access where local regulations do not allow prediction markets, even if Proof KYC is in place.
+- **Geoblocking is still required**: KYC verifies identity, but geoblocking is still needed because prediction markets are not permitted in all jurisdictions.
 
 ## Verify API
 
-Check if a wallet is verified:
+Check if a wallet is verified by calling `GET https://proof.dflow.net/verify/{address}`. Returns `{ "verified": true }` or `{ "verified": false }`.
 
-```bash
-curl "https://proof.dflow.net/verify/{address}"
-# → { "verified": true } or { "verified": false }
-```
+For prediction markets: call before allowing buys/sells of outcome tokens. Gate only at trade time — not for browsing markets or API access.
 
-For prediction markets: call before allowing buys/sells of outcome tokens. Gate only at trade time—not for browsing markets or API access. For other use cases: call whenever you need to gate a feature by verification status.
+## Deep Link Flow (Send Unverified Users to Proof)
 
-## Deep Link (Send Unverified Users to Proof)
+When a user is unverified, redirect them to Proof with ownership proof:
 
-When a user is unverified, redirect them to Proof with ownership proof. Required params:
-
-| Param         | Required | Description                              |
-| ------------- | -------- | ---------------------------------------- |
-| `wallet`      | Yes      | Solana wallet address                    |
-| `signature`   | Yes      | Base58-encoded signature of the message  |
-| `timestamp`   | Yes      | Unix timestamp in milliseconds          |
-| `redirect_uri`| Yes      | URL to return to after verification     |
-| `projectId`   | No       | Project identifier for tracking          |
-
-**Message format** (user must sign this with their wallet):
-
-```
-Proof KYC verification: {timestamp}
-```
-
-Example flow:
-
-1. User connects wallet (e.g. via Phantom Connect).
-2. Have user sign `Proof KYC verification: {Date.now()}`.
+1. User connects wallet (e.g., via Phantom Connect).
+2. Have user sign the message: `Proof KYC verification: {timestamp}` (timestamp is `Date.now()` in milliseconds).
 3. Build deep link: `https://dflow.net/proof?wallet=...&signature=...&timestamp=...&redirect_uri=...`
 4. Open in new tab or redirect.
-5. User completes KYC at Proof (or cancels); they are redirected to your `redirect_uri` either way.
+5. User completes KYC at Proof (or cancels) and is redirected to your `redirect_uri`.
 6. Call verify API again on return to confirm status. If they cancelled, `verified` will still be false.
 
-## Minimal Code
+Required params: `wallet`, `signature` (base58-encoded), `timestamp`, `redirect_uri`. Optional: `projectId` for tracking.
 
-```ts
-// Verify
-const res = await fetch(`https://proof.dflow.net/verify/${address}`);
-const { verified } = await res.json();
+## Gating Rules
 
-// Build deep link (after user signs message)
-const timestamp = Date.now();
-const message = `Proof KYC verification: ${timestamp}`;
-const signatureBytes = await wallet.signMessage(new TextEncoder().encode(message));
-const signature = bs58.encode(signatureBytes);
-
-const params = new URLSearchParams({
-  wallet,
-  signature,
-  timestamp: timestamp.toString(),
-  redirect_uri,
-});
-const deepLink = `https://dflow.net/proof?${params.toString()}`;
-```
-
-## Handling the Return
-
-When the user completes verification (or cancels), they are redirected to your `redirect_uri`. Run this handler on that page to confirm status:
-
-```ts
-async function handleProofCallback(walletAddress: string): Promise<boolean> {
-  const response = await fetch(
-    `https://proof.dflow.net/verify/${walletAddress}`
-  );
-  const { verified } = await response.json();
-  return verified;
-}
-```
-
-Use the same wallet address you sent in the deep link. If the user cancelled, `verified` will be false; if they completed KYC, it will be true.
+- Gate Proof verification **only when the user attempts to trade** (buy or sell outcome tokens).
+- Do **not** gate browsing, market discovery, fetching events/orderbooks, or any read-only API access.
+- Always re-verify after the user returns from the Proof deep link — do not cache the result indefinitely.
 
 ## Resources
 
