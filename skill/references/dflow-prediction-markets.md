@@ -17,6 +17,7 @@ Always ask these before giving implementation steps. Do not assume defaults.
 
 Infer intent from the user's request. Do not ask them to choose a "trade type."
 Map intent to flow:
+
 - **Open a position** -> buy YES/NO outcome tokens (increase)
 - **Sell/close a position** -> sell YES/NO outcome tokens (decrease)
 - **Redeem** -> swap outcome tokens back into settlement mint after determination
@@ -36,16 +37,13 @@ Map intent to flow:
 Markets move through: `initialized` -> `active` -> `inactive` -> `closed` -> `determined` -> `finalized`.
 
 Key rules:
+
 - Only `active` markets accept trades.
 - `inactive` is a pause state — markets can return to `active`.
 - Always check `redemptionStatus` before submitting redemption requests — `determined` or `finalized` alone is not sufficient.
 - Filter markets by status using the Metadata API (e.g., `?status=active`).
 
 Use the MCP server to look up the full lifecycle table and allowed actions per status.
-
-## CORS: Browser Requests Are Blocked
-
-The Trading API does not set CORS headers. Browser requests to `/order` will fail. Builders MUST proxy Trade API calls through their own backend (e.g., Cloudflare Workers, Vercel Edge Functions).
 
 ## Maintenance Window
 
@@ -87,6 +85,7 @@ To build category filters:
 3. Fetch events with nested markets.
 
 Gotchas:
+
 - **Too many series tickers** can cause long URLs. Chunk tickers into smaller batches and merge results.
 - **Stale responses** can overwrite state when users switch categories quickly. Use an abort controller to ignore older responses.
 - **Empty categories** should show a clear empty state.
@@ -94,7 +93,7 @@ Gotchas:
 
 ## Real-Time Data (WebSockets)
 
-For live price tickers, trade feeds, and orderbook depth, see [dflow-websockets.md](dflow-websockets.md).
+For live price tickers, trade feeds, and orderbook depth, see [dflow-websockets.md](dflow-websockets.md). A free dev WebSocket endpoint is available at `wss://dev-prediction-markets-api.dflow.net/api/v1/ws` (no API key required). Production WebSockets require an API key.
 
 ## Prediction Market Slippage
 
@@ -106,10 +105,6 @@ The `/order` endpoint supports two separate slippage parameters:
 When trading directly from a settlement mint to an outcome token, only `predictionMarketSlippageBps` matters (there is no spot swap leg).
 
 Both accept an integer (basis points) or `"auto"`.
-
-## Input Mint and Latency
-
-Using the settlement mint (USDC or CASH) as input is the fastest path. Other tokens (e.g., SOL) add a swap leg that adds ~50ms of latency.
 
 ## Trading Flows
 
@@ -162,11 +157,7 @@ Use the MCP server to look up the full response schema.
 
 ### DFlow Base Trading Fees
 
-DFlow charges probability-weighted base fees on all prediction market trades. Fees are higher when outcomes are uncertain and lower as markets approach resolution.
-
 Fee tiers are based on rolling 30-day outcome token volume (tracked by API key). Higher volume means lower fees. Use the MCP server to look up current fee tier thresholds.
-
-Builders with over $100k in 30-day volume may qualify for rebates. Contact DFlow for eligibility.
 
 ### Platform Fees (Dynamic)
 
@@ -183,6 +174,7 @@ Three distinct costs in prediction market trades can be sponsored:
 3. **Market initialization** — One-time onchain cost (~0.02 SOL)
 
 Options:
+
 - `sponsor` — Covers all three. Simplest for fully sponsored trades.
 - `predictionMarketInitPayer` — Covers only market initialization. Users still pay transaction fees.
 
@@ -198,6 +190,7 @@ Most visible cost to users comes from **Solana account rent**, not platform fees
 ### `route_not_found`
 
 Common causes:
+
 1. **Wrong `outputMint`**: when selling, `outputMint` must match the market's settlement mint.
 2. **Wrong `amount` units**: the `amount` is in atomic units (e.g., `8_000_000` for 8 USDC, not `8`).
 3. **No liquidity**: check the orderbook. A `null` bid/ask means no counterparty.
