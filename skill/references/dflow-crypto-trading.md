@@ -69,13 +69,9 @@ The response includes an `executionMode` field (`sync` or `async`) that determin
 - `sync` — Trade executes atomically in one transaction. Use standard RPC confirmation.
 - `async` — Trade executes across multiple transactions. Poll `/order-status` to track fills.
 
-## Deprecated Endpoints
+## Recommended Endpoint
 
-The previous `/quote`, `/swap`, and `/swap-instructions` endpoints are deprecated. All imperative trading flows now use the `/order` endpoint. Do not generate code using the old endpoints.
-
-## CORS: Browser Requests Are Blocked
-
-The Trading API does not set CORS headers. Browser requests to `/order` or `/intent` will fail. Builders MUST proxy Trade API calls through their own backend. Most use a lightweight edge function (Cloudflare Workers, Vercel Edge Functions, etc.) to keep latency minimal.
+The `/order` endpoint is the recommended way to execute imperative trades. The older `/quote`, `/swap`, and `/swap-instructions` endpoints still work but `/order` is simpler and preferred for new integrations.
 
 ## Token Lists (Swap UI Guidance)
 
@@ -116,10 +112,6 @@ Ask:
 - Which token should pay the fee?
 - What wallet address should receive fees?
 - Do you already have a fee account, or should we use a referral account to create it?
-
-## Routing Controls (Imperative Only)
-
-Imperative trades support routing parameters (`dexes`, `excludeDexes`, `onlyDirectRoutes`, `maxRouteLength`, `onlyJitRoutes`, `forJitoBundle`). These are not available for declarative trades. Use the MCP server to look up parameter details.
 
 ## Error Handling
 

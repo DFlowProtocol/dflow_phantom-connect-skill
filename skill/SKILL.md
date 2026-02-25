@@ -51,7 +51,7 @@ Many tasks combine both (e.g., a swap UI needs wallet connection AND DFlow tradi
 
 **DFlow trading** (swaps, prediction markets, KYC):
 
-- `references/dflow-crypto-trading.md` — spot token swaps, imperative vs declarative, slippage, priority fees, platform fees
+- `references/dflow-crypto-trading.md` — spot token swaps, imperative vs declarative trades, slippage, priority fees, platform fees
 - `references/dflow-prediction-markets.md` — market discovery, trading, redemption, maintenance windows, fee models
 - `references/dflow-websockets.md` — real-time price, trade, and orderbook streaming via WebSocket
 - `references/dflow-proof.md` — Proof KYC verification (required for prediction market trades, usable for any gated feature)
@@ -89,8 +89,7 @@ Follow the patterns in the reference files. Key rules by domain:
 
 **DFlow Trading:**
 
-- The Trading API does not set CORS headers. Browser calls to `/order` or `/intent` will fail. Builders must proxy through their own backend.
-- Dev endpoints (`dev-quote-api.dflow.net`) work without an API key but are rate-limited. Production requires a key from pond.dflow.net/build/api-key.
+- Dev endpoints (`dev-quote-api.dflow.net`, `dev-prediction-markets-api.dflow.net`, `wss://dev-prediction-markets-api.dflow.net/api/v1/ws`) work without an API key but are rate-limited. Production requires a key from pond.dflow.net/build/api-key.
 - Prediction market trades require Proof KYC before buying or selling outcome tokens. Browsing and discovery do not require KYC.
 - Prediction markets also require geoblocking for restricted jurisdictions.
 
@@ -166,10 +165,10 @@ User says: "Build a full swap page with wallet connect and DFlow"
 
 Actions:
 
-1. Ask: which platform? Imperative or declarative? Platform fees?
+1. Ask: which platform? Imperative or declarative swap? Platform fees?
 2. Read the relevant SDK reference AND `references/dflow-crypto-trading.md`
 3. Set up wallet connection with Phantom
-4. Build swap form, proxy `/order` calls through backend (CORS)
+4. Build swap form, proxy `/order` calls through backend
 5. Sign transaction with connected wallet, submit to RPC
 
 Result: End-to-end swap page combining Phantom wallet and DFlow trading
