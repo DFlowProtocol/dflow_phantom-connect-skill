@@ -6,7 +6,7 @@ Complete reference for `@phantom/react-native-sdk`.
 
 All Phantom Connect integrations require:
 
-1. **Phantom Portal Account** — Register at phantom.com/portal
+1. **Phantom Portal Account** — Register at phantom.com/portal/login
 2. **App ID** — Get from Portal (required when using Google or Apple auth providers)
 3. **Allowlisted URLs** — Add your redirect URLs in Portal settings
 

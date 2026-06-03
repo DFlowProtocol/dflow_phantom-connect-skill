@@ -10,7 +10,7 @@ license: MIT
 metadata:
   author: phantom
   version: "1.0"
-  homepage: https://github.com/phantom/phantom-connect-cursor-plugin
+  homepage: https://github.com/phantom/phantom-agent-kit
 ---
 
 # Phantom Wallet MCP
@@ -35,7 +35,7 @@ Add the Phantom MCP server to your MCP configuration:
 }
 ```
 
-Get your `PHANTOM_APP_ID` from [Phantom Portal](https://portal.phantom.com). On first use, the server opens a browser for OAuth authentication via Google or Apple login.
+Get your `PHANTOM_APP_ID` from [Phantom Portal](https://phantom.com/portal/login). On first use, the server opens a browser for OAuth authentication via Google or Apple login.
 
 ## Available Tools
 

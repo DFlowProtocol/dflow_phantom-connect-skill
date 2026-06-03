@@ -28,7 +28,7 @@ Determine the domain, then route to the right references.
 
 **DFlow trading:**
 
-- Spot token swaps (imperative or declarative)
+- Spot token swaps
 - Prediction market discovery, trading, and redemption
 - Proof KYC identity verification
 
@@ -51,7 +51,7 @@ Many tasks combine both (e.g., a swap UI needs wallet connection AND DFlow tradi
 
 **DFlow trading** (swaps, prediction markets, KYC):
 
-- `references/dflow-crypto-trading.md` — spot token swaps, imperative vs declarative trades, slippage, priority fees, platform fees
+- `references/dflow-crypto-trading.md` — spot token swaps, slippage, priority fees, platform fees
 - `references/dflow-prediction-markets.md` — market discovery, trading, redemption, maintenance windows, fee models
 - `references/dflow-websockets.md` — real-time price, trade, and orderbook streaming via WebSocket
 - `references/dflow-proof.md` — Proof KYC verification (required for prediction market trades, usable for any gated feature)
@@ -67,15 +67,14 @@ Before implementing, ask questions based on the domain:
 
 **For DFlow spot trades:**
 
-- Imperative or declarative? If unsure, suggest starting with imperative.
-- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/build/api-key.
+- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/get-started/api-key.
 - Platform fees? If yes, what bps and what fee account?
 - Client environment? (web, mobile, backend, CLI)
 
 **For DFlow prediction markets:**
 
 - Settlement mint? (USDC or CASH — these are the only two)
-- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/build/api-key.
+- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/get-started/api-key.
 - Platform fees? If yes, use `platformFeeScale` for dynamic fees.
 - Client environment? (web, mobile, backend, CLI)
 
@@ -89,7 +88,7 @@ Follow the patterns in the reference files. Key rules by domain:
 
 **DFlow Trading:**
 
-- Dev endpoints (`dev-quote-api.dflow.net`, `dev-prediction-markets-api.dflow.net`, `wss://dev-prediction-markets-api.dflow.net/api/v1/ws`) work without an API key but are rate-limited. Production requires a key from pond.dflow.net/build/api-key.
+- Dev endpoints (`dev-quote-api.dflow.net`, `dev-prediction-markets-api.dflow.net`, `wss://dev-prediction-markets-api.dflow.net/api/v1/ws`) work without an API key but are rate-limited. Production requires a key from pond.dflow.net/get-started/api-key.
 - Prediction market trades require Proof KYC before buying or selling outcome tokens. Browsing and discovery do not require KYC.
 - Prediction markets also require geoblocking for restricted jurisdictions.
 
@@ -138,9 +137,9 @@ User says: "Add a swap feature using DFlow"
 
 Actions:
 
-1. Ask: imperative or declarative? Platform fees? Client environment?
+1. Ask: Platform fees? Client environment?
 2. Read `references/dflow-crypto-trading.md`
-3. If unsure on trade type, suggest imperative `/order` flow (simpler, synchronous)
+3. Use the `/order` flow: request the order, sign, submit to RPC, confirm
 4. Connect wallet with Phantom, sign and submit transaction to Solana RPC
 
 Result: Working swap UI with DFlow routing
@@ -165,7 +164,7 @@ User says: "Build a full swap page with wallet connect and DFlow"
 
 Actions:
 
-1. Ask: which platform? Imperative or declarative swap? Platform fees?
+1. Ask: which platform? Platform fees?
 2. Read the relevant SDK reference AND `references/dflow-crypto-trading.md`
 3. Set up wallet connection with Phantom
 4. Build swap form, proxy `/order` calls through backend
@@ -175,11 +174,11 @@ Result: End-to-end swap page combining Phantom wallet and DFlow trading
 
 ## Resources
 
-- Phantom Portal: phantom.com/portal
-- Phantom Docs: docs.phantom.com
-- SDK Examples: github.com/phantom/wallet-sdk/tree/main/examples
+- Phantom Portal: phantom.com/portal/login
+- Phantom Docs: docs.phantom.com/introduction
+- SDK Examples: github.com/phantom/phantom-connect-sdk/tree/main/examples
 - Phantom MCP Server: docs.phantom.com/resources/mcp-server
 - DFlow MCP Server: pond.dflow.net/mcp
-- DFlow MCP Docs: pond.dflow.net/build/mcp
+- DFlow MCP Docs: pond.dflow.net/ai/mcp
 - DFlow Docs: pond.dflow.net/introduction
 - DFlow Cookbook: github.com/DFlowProtocol/cookbook
