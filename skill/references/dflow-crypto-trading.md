@@ -2,32 +2,28 @@
 
 General-purpose guidance for spot crypto token trading on Solana using DFlow. Applies to web, mobile, backend, or CLI experiences.
 
-DFlow is a DEX aggregator that sources liquidity across venues on Solana. It supports two trade types for spot crypto: **imperative** and **declarative**.
+DFlow is the most powerful trading infrastructure on Solana, enabling apps to access the cutting edge of financial markets.
 
-For detailed API parameters, response schemas, and code examples, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/build.
+Across both spot token trading and prediction markets, DFlow serves millions of users globally and is trusted by the largest trading platforms.
+
+For detailed API parameters, response schemas, and code examples, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/spot/introduction.
 
 ## First Questions (Always Ask)
 
 Always ask these before giving implementation steps. Do not assume defaults.
 
-1. **Trade type**: Do you want **imperative** or **declarative** trades? If the user is unsure, suggest starting with imperative — it is simpler to integrate, executes synchronously, and is the right starting point for most builders.
-2. **Environment**: Are you building against **dev** or **production** endpoints? Dev endpoints work without an API key but are rate-limited and not suitable for production. Production requires an API key — apply at `pond.dflow.net/build/api-key`.
-3. **Platform fees**: Do you want to charge platform fees? If yes, what bps and what fee account (wallet address) should receive them?
-4. **Client environment**: Are you building web, mobile, backend, or CLI?
+1. **Environment**: Are you building against **dev** or **production** endpoints? Dev endpoints work without an API key but are rate-limited and not suitable for production. Production requires an API key — apply at `pond.dflow.net/get-started/api-key`.
+2. **Platform fees**: Do you want to charge platform fees? If yes, what bps and what fee account (wallet address) should receive them?
+3. **Client environment**: Are you building web, mobile, backend, or CLI?
 
-## Choosing a Trade Type (Imperative vs Declarative)
+## Trade Flow
 
-Ask the user which trade type they want. If they don't know, recommend imperative as the starting point.
-
-### Imperative Trades (Recommended Starting Point)
-
-The app specifies the execution plan before the user signs. The user signs a single transaction, submits it to an RPC, and confirms.
+The app requests an order, the user signs a single transaction, the app submits it to an RPC, and confirms.
 
 - Deterministic execution: the route is fixed at quote time.
 - Synchronous: settles atomically in one transaction.
 - The app can modify the swap transaction for composability.
 - Supports venue selection via `dexes` parameter.
-- Good fit for: most swap UIs, strategy-driven trading, automation, research, and testing.
 
 Flow:
 
@@ -35,32 +31,6 @@ Flow:
 2. Deserialize and sign the returned base64 transaction
 3. Submit to Solana RPC
 4. Confirm transaction
-
-### Declarative Trades
-
-The user defines what they want (assets + constraints); DFlow determines how the trade executes at execution time.
-
-- Routing is finalized at execution, not quote time.
-- Reduces slippage and sandwich risk.
-- Higher execution reliability in fast-moving markets.
-- Uses Jito bundles for atomic open + fill execution.
-- Does NOT support Token-2022 mints (use imperative `/order` instead).
-
-Flow:
-
-1. `GET /intent` to get an open order transaction
-2. Sign the open transaction
-3. `POST /submit-intent` with the signed transaction and quote response
-4. Monitor status using `monitorOrder` from `@dflow-protocol/swap-api-utils` or poll `/order-status`
-
-### When to Choose Declarative Over Imperative
-
-Steer users toward declarative only when they specifically need:
-
-- Better pricing in fast-moving or fragmented markets
-- Reduced sandwich attack exposure
-- Execution reliability over route control
-- Lower slippage on large trades
 
 ### `executionMode` in the `/order` Response
 
@@ -71,7 +41,7 @@ The response includes an `executionMode` field (`sync` or `async`) that determin
 
 ## Recommended Endpoint
 
-The `/order` endpoint is the recommended way to execute imperative trades. The older `/quote`, `/swap`, and `/swap-instructions` endpoints still work but `/order` is simpler and preferred for new integrations.
+The `/order` endpoint is the recommended way to execute trades. The older `/quote`, `/swap`, and `/swap-instructions` endpoints still work but `/order` is simpler and preferred for new integrations.
 
 ## Token Lists (Swap UI Guidance)
 
@@ -92,16 +62,13 @@ Two options:
 Two modes:
 
 - **Max Priority Fee** (recommended): DFlow dynamically selects an optimal fee capped at your maximum. Set `priorityLevel` and `maxPriorityFeeLamports`.
-- **Exact Priority Fee**: fixed fee in lamports. For intent endpoints, include the 10,000 lamport base processing fee.
+- **Exact Priority Fee**: fixed fee in lamports.
 
 Default if unset: automatic priority fees capped at 0.005 SOL.
 
 ## Platform Fees (Ask Early)
 
-Platform fees let builders monetize trades. Key constraints:
-
-- **Imperative trades**: fees can be collected from `inputMint` or `outputMint`
-- **Declarative trades**: fees can only be collected from `outputMint`
+Platform fees let builders monetize trades. Fees can be collected from `inputMint` or `outputMint`.
 
 Use `referralAccount` to auto-create the fee account if it does not exist.
 
@@ -134,4 +101,4 @@ environment-based configuration.
 
 ## Cookbook
 
-Full runnable examples for both imperative and declarative trades are in the DFlow Cookbook Repo: `https://github.com/DFlowProtocol/cookbook`
+Full runnable examples are in the DFlow Cookbook Repo: `https://github.com/DFlowProtocol/cookbook`

@@ -2,21 +2,20 @@
 
 General-purpose guidance for prediction market discovery, trading, and redemption on Solana. Applies to web, mobile, backend, or CLI experiences.
 
-Prediction market trades are always **imperative and async** (they use `/order` and execute across multiple transactions). Do not offer declarative trades for prediction markets.
+Prediction market trades use `/order` and execute asynchronously across multiple transactions.
 
-For detailed API parameters, response schemas, endpoint lists, and code examples, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/build.
+For detailed API parameters, response schemas, endpoint lists, and code examples, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/prediction-markets/introduction.
 
 ## Required Prompts (Always Ask)
 
 Always ask these before giving implementation steps. Do not assume defaults.
 
 1. **Settlement mint**: Are you using **USDC** or **CASH**? These are the only two supported settlement mints.
-2. **Environment**: Are you building against **dev** or **production** endpoints? Dev endpoints work without an API key but are rate-limited and not suitable for production. Production requires an API key — apply at `pond.dflow.net/build/api-key`.
+2. **Environment**: Are you building against **dev** or **production** endpoints? Dev endpoints work without an API key but are rate-limited and not suitable for production. Production requires an API key — apply at `pond.dflow.net/get-started/api-key`.
 3. **Platform fees**: Do you want to charge platform fees? If yes, use `platformFeeScale` for dynamic fees (see Fees section).
 4. **Client environment**: Are you building web, mobile, backend, or CLI?
 
-Infer intent from the user's request. Do not ask them to choose a "trade type."
-Map intent to flow:
+Map the user's request to flow:
 
 - **Open a position** -> buy YES/NO outcome tokens (increase)
 - **Sell/close a position** -> sell YES/NO outcome tokens (decrease)
@@ -51,7 +50,7 @@ Kalshi's clearinghouse has a weekly maintenance window on **Thursdays from 3:00 
 
 ## Compliance (Geoblocking)
 
-Prediction market access has jurisdictional restrictions. Builders are responsible for enforcing required geoblocking before enabling trading, even if KYC (Proof) is used. See: https://pond.dflow.net/legal/prediction-market-compliance
+Prediction market access has jurisdictional restrictions. Builders are responsible for enforcing required geoblocking before enabling trading, even if KYC (Proof) is used. See: https://pond.dflow.net/prediction-markets/prediction-market-compliance
 
 ## Proof KYC (Identity Verification)
 

@@ -6,7 +6,7 @@ Identity verification that links verified real-world identities to Solana wallet
 
 **Also useful for**: Gated features, compliance-aware apps, onboarding flows, or any flow that needs verified wallet ownership.
 
-For full docs, integration timelines, and API reference, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/learn/proof.
+For full docs, integration timelines, and API reference, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/resources/proof/introduction.
 
 ## Key Facts
 
@@ -41,6 +41,6 @@ Required params: `wallet`, `signature` (base58-encoded), `timestamp`, `redirect_
 
 ## Resources
 
-- [Proof overview and timelines](https://pond.dflow.net/learn/proof)
-- [Partner integration guide](https://pond.dflow.net/build/proof/partner-integration)
-- [Proof API reference](https://pond.dflow.net/build/proof-api/introduction)
+- [Proof overview and timelines](https://pond.dflow.net/resources/proof/introduction)
+- [Partner integration guide](https://pond.dflow.net/resources/proof/partner-integration)
+- [Proof API reference](https://pond.dflow.net/resources/proof/introduction)

@@ -4,14 +4,14 @@ Real-time streaming of prediction market data via WebSocket. Use for live price 
 
 WebSockets show all Kalshi trades (both onchain and offchain).
 
-For message schemas, field definitions, and code examples, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/build.
+For message schemas, field definitions, and code examples, use the DFlow MCP server (`SearchDFlow`) or see pond.dflow.net/prediction-markets/introduction.
 
 ## Environment (Always Ask)
 
 Ask the user: **Are you building against dev or production?**
 
 - **Dev**: `wss://dev-prediction-markets-api.dflow.net/api/v1/ws` — no API key required, rate-limited, not for production use.
-- **Production**: `wss://<your-production-host>/api/v1/ws` — requires an API key. Apply at pond.dflow.net/build/api-key.
+- **Production**: `wss://<your-production-host>/api/v1/ws` — requires an API key. Apply at pond.dflow.net/get-started/api-key.
 
 ## Connection
 

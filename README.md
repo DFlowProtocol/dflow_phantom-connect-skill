@@ -14,7 +14,7 @@ Once installed, Claude automatically uses this skill when you ask about:
 - NFT minting experiences
 - Crypto payment flows
 - Solana transactions and transfers
-- DFlow token swaps (declarative and imperative)
+- DFlow token swaps
 - Prediction market discovery and trading
 - Proof KYC identity verification
 
@@ -66,7 +66,7 @@ skill/
     ├── token-gating.md              # Client-side and server-side token gating
     ├── nft-minting.md               # Mint pages, Metaplex Core, compressed NFTs
     ├── payments.md                  # SOL/USDC payments, checkout verification
-    ├── dflow-crypto-trading.md      # DFlow spot trading, declarative vs imperative
+    ├── dflow-crypto-trading.md      # DFlow spot trading
     ├── dflow-prediction-markets.md  # Market discovery, trading, redemption
     ├── dflow-websockets.md          # Real-time price, trade, orderbook streaming
     └── dflow-proof.md               # Proof KYC verification
@@ -100,15 +100,15 @@ skill/
 
 All Phantom Connect integrations require:
 
-1. **Phantom Portal Account** — [phantom.com/portal](https://phantom.com/portal)
+1. **Phantom Portal Account** — [phantom.com/portal/login](https://phantom.com/portal/login)
 2. **App ID** — Get from Portal, required for Google/Apple social login
 3. **Allowlisted URLs** — Add domains and redirect URLs in Portal
 
 For DFlow integrations:
 
 - Dev endpoints work without an API key but are rate-limited
-- [Apply for an API key](https://pond.dflow.net/build/api-key) before releasing to production
-- Prediction markets [require geoblocking](https://pond.dflow.net/learn/prediction-markets#regulatory-and-compliance-requirements) for restricted jurisdictions
+- [Apply for an API key](https://pond.dflow.net/get-started/api-key) before releasing to production
+- Prediction markets [require geoblocking](https://pond.dflow.net/prediction-markets/prediction-markets-101#regulatory-and-compliance-requirements) for restricted jurisdictions
 
 ## How the Skill Works
 
@@ -119,9 +119,9 @@ This keeps context usage efficient.
 
 ## Related Resources
 
-- [Phantom Developer Docs](https://docs.phantom.com)
-- [Phantom Portal](https://phantom.com/portal)
-- [SDK Examples](https://github.com/phantom/wallet-sdk/tree/main/examples)
+- [Phantom Developer Docs](https://docs.phantom.com/introduction)
+- [Phantom Portal](https://phantom.com/portal/login)
+- [SDK Examples](https://github.com/phantom/phantom-connect-sdk/tree/main/examples)
 - [Phantom MCP Server](https://docs.phantom.com/resources/mcp-server)
 - [DFlow MCP Server](https://pond.dflow.net/mcp)
 - [DFlow Docs](https://pond.dflow.net/introduction)

@@ -6,7 +6,7 @@ Complete reference for `@phantom/react-sdk`.
 
 All Phantom Connect integrations require:
 
-1. **Phantom Portal Account** — Register at phantom.com/portal
+1. **Phantom Portal Account** — Register at phantom.com/portal/login
 2. **App ID** — Get from Portal (required when using Google or Apple auth providers)
 3. **Allowlisted URLs** — Add your domains and redirect URLs in Portal settings
 
@@ -258,8 +258,8 @@ import { PhantomProvider, DebugLevel } from "@phantom/react-sdk";
 
 ### "appId required" error
 Cause: Using `"google"` or `"apple"` provider without providing an appId.
-Solution: Register at phantom.com/portal, get the App ID, and add it to the PhantomProvider config.
+Solution: Register at phantom.com/portal/login, get the App ID, and add it to the PhantomProvider config.
 
 ### Redirect not working after OAuth login
 Cause: The redirect URL is not allowlisted in Phantom Portal.
-Solution: Go to phantom.com/portal, open app settings, and add the exact redirect URL (including protocol and path) to the allowlist.
+Solution: Go to phantom.com/portal/login, open app settings, and add the exact redirect URL (including protocol and path) to the allowlist.
