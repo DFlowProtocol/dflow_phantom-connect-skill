@@ -11,7 +11,7 @@ Swap any pair of Solana tokens via DFlow. Trades settle **synchronously** in one
 
 ## Quote (read-only)
 
-`GET /order` **without** a `userPublicKey` returns all price fields (`inAmount`, `outAmount`, `priceImpactPct`, …) and **no** transaction — use it for a live-quote UI before the user connects. Don't invent a separate `/quote` endpoint; the older surface redirects back to `/order`. (Field list: load `/resources/trading-api/order/order` via the docs MCP.)
+`GET /order` **without** a `userPublicKey` returns all price fields (`inAmount`, `outAmount`, `priceImpactPct`, …) and **no** transaction — use it for a live-quote UI before the user connects. Prefer `/order` over the older `/quote` endpoint — `/quote` still works but isn't recommended for new integrations. (Field list: load `/resources/trading-api/order/order` via the docs MCP.)
 
 ## Trade — `/order`
 
