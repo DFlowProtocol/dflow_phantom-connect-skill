@@ -1,8 +1,8 @@
 # Phantom Connect Skill for Claude
 
 A skill that teaches Claude how to build wallet-connected Solana apps with
-Phantom Connect SDKs. Also covers DFlow token swaps, prediction market trading,
-and Proof KYC verification.
+Phantom Connect SDKs. Also covers DFlow spot token swaps and real-time
+market-data streaming.
 
 ## What It Does
 
@@ -14,9 +14,8 @@ Once installed, Claude automatically uses this skill when you ask about:
 - NFT minting experiences
 - Crypto payment flows
 - Solana transactions and transfers
-- DFlow token swaps
-- Prediction market discovery and trading
-- Proof KYC identity verification
+- DFlow spot token swaps
+- Real-time market data (quotes, order book, priority fees) over WebSocket
 
 ## Installation
 
@@ -66,10 +65,8 @@ skill/
     ├── token-gating.md              # Client-side and server-side token gating
     ├── nft-minting.md               # Mint pages, Metaplex Core, compressed NFTs
     ├── payments.md                  # SOL/USDC payments, checkout verification
-    ├── dflow-crypto-trading.md      # DFlow spot trading
-    ├── dflow-prediction-markets.md  # Market discovery, trading, redemption
-    ├── dflow-websockets.md          # Real-time price, trade, orderbook streaming
-    └── dflow-proof.md               # Proof KYC verification
+    ├── dflow-crypto-trading.md      # DFlow spot swaps via /order
+    └── dflow-websockets.md          # Real-time quote / order-book / priority-fee streaming
 ```
 
 ## Example Prompts
@@ -82,9 +79,8 @@ skill/
 "Help me send a Solana transaction with the React SDK"
 "Convert this to use the Browser SDK instead of React"
 "Add a DFlow swap flow to my app"
-"Help me trade into a prediction market position"
 "Build a swap UI that lists wallet tokens on the FROM side"
-"Add Proof KYC verification before prediction market buys"
+"Show a live DFlow order book for a token pair"
 ```
 
 ## SDK Choices
@@ -108,7 +104,7 @@ For DFlow integrations:
 
 - Dev endpoints work without an API key but are rate-limited
 - [Apply for an API key](https://pond.dflow.net/get-started/api-key) before releasing to production
-- Prediction markets [require geoblocking](https://pond.dflow.net/prediction-markets/prediction-markets-101#regulatory-and-compliance-requirements) for restricted jurisdictions
+- Market-data stream access is gated per API key (separate from `/order`) — request it from the DFlow team
 
 ## How the Skill Works
 
