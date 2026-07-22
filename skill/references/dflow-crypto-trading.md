@@ -18,13 +18,11 @@ Swap any pair of Solana tokens via DFlow. Trades settle **synchronously** in one
 Single round-trip: get a quote and a signed-ready `VersionedTransaction` together; sign, submit, confirm. Fully synchronous — there is no async/`executionMode`/`/order-status` flow. Works with **all** SPL + Token-2022 mints.
 
 ```ts
-const { transaction, lastValidBlockHeight } = await fetch("/api/order?...").then(r => r.json());
+const { transaction } = await fetch("/api/order?...").then(r => r.json());
 const tx = VersionedTransaction.deserialize(Buffer.from(transaction, "base64"));
 const sig = await sendTransaction(tx, connection);          // wallet's RPC (browser)
-await connection.confirmTransaction(                         // app's RPC (reads only)
-  { signature: sig, blockhash: tx.message.recentBlockhash, lastValidBlockHeight },
-  "confirmed",
-);
+const { value } = await connection.confirmTransaction(sig, "confirmed");  // app's RPC (reads only)
+if (value.err) throw new Error(`swap failed: ${JSON.stringify(value.err)}`);
 ```
 
 **Two broadcast paths — pick by surface:**
@@ -37,7 +35,6 @@ await connection.confirmTransaction(                         // app's RPC (reads
 - **Atomic units always.** `500_000` = $0.50 USDC, `1_000_000_000` = 1 SOL. The API rejects human-readable amounts; confirm decimals each time.
 - **No symbol resolver on the API.** The Trading API takes **base58 mint addresses only**; `"USDC"` won't work on `/order`. (The `dflow` CLI resolves a small symbol set; the API does not.)
 - **Browser apps must proxy `/order`.** No CORS — call it from a backend (edge function/API route), never directly from the browser.
-- **Confirm against the blockhash DFlow signed with — never a fresh one.** Use `tx.message.recentBlockhash` (from the deserialized tx) + `lastValidBlockHeight` (from the `/order` response). **Never** `connection.getLatestBlockhash()` for confirmation: a fresh blockhash can already be past that `lastValidBlockHeight` (confirmation times out on a trade that landed), and public `mainnet-beta` RPCs now 403 `getLatestBlockhash` (surfaces as `"failed to get recent blockhash"`).
 - **Wire wallets via Wallet-Standard auto-discovery, not per-wallet adapters.** Pass `wallets={[]}` to `<WalletProvider>`; modern Phantom/Solflare/Backpack are auto-detected. Do **not** `new PhantomWalletAdapter()` — legacy adapters silently downgrade `sendTransaction` to `signTransaction` + `sendRawTransaction` through *your* RPC, re-introducing the public-RPC 403.
 - **`route_not_found` is usually units or mints, not liquidity.** Check atomic units and both mint addresses before assuming no route.
 

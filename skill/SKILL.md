@@ -78,7 +78,7 @@ Follow the patterns in the reference files. Key rules by domain:
 
 **DFlow:**
 
-- Trades are **synchronous** — one `/order` call returns a signed-ready transaction; sign, submit, confirm against the blockhash DFlow signed with (never a fresh `getLatestBlockhash`). There is no async/`executionMode` flow.
+- Trades are **synchronous** — one `/order` call returns a signed-ready transaction; sign, submit, and confirm. There is no async/`executionMode` flow.
 - **Browser apps must proxy** DFlow HTTP (`/order`, no CORS) and WebSocket streams (browsers can't set the `x-api-key` header) through their backend.
 - Dev endpoints (`dev-quote-api.dflow.net`) work without a key but are rate-limited; production requires a key from pond.dflow.net/get-started/api-key. Stream access is gated per key (separate from `/order`).
 
@@ -129,7 +129,7 @@ Actions:
 
 1. Ask: API key? Client environment? Platform fees?
 2. Read `references/dflow-crypto-trading.md`
-3. Use the `/order` flow: request the order (proxy through backend in a browser), deserialize, sign, submit, confirm against `tx.message.recentBlockhash` + `lastValidBlockHeight`
+3. Use the `/order` flow: request the order (proxy through backend in a browser), deserialize, sign, submit, confirm
 4. In a browser, broadcast via `wallet.sendTransaction` (wallet's RPC); server-side, `sendRawTransaction` through your own RPC
 
 Result: Working swap with DFlow routing
