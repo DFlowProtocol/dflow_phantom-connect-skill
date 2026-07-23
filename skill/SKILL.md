@@ -1,6 +1,6 @@
 ---
 name: dflow-phantom-connect
-description: "Build Solana wallet-connected apps with Phantom Connect SDKs and DFlow spot trading. Use when user asks to connect a Phantom wallet, integrate Phantom in React, React Native, or vanilla JS, sign messages or transactions, build token-gated pages, mint NFTs, accept crypto payments, or swap/stream tokens with DFlow. Covers @phantom/react-sdk, @phantom/react-native-sdk, @phantom/browser-sdk, and DFlow spot trading + market-data streaming. Do NOT use for Ethereum or EVM wallet integrations, or non-DFlow DEX routing."
+description: "Build Solana wallet-connected apps with Phantom Connect SDKs and DFlow spot trading. Use when user asks to connect a Phantom wallet, integrate Phantom in React, React Native, or vanilla JS, sign messages or transactions, build token-gated pages, mint NFTs, accept crypto payments, or swap/stream tokens with DFlow. Covers @phantom/react-sdk, @phantom/react-native-sdk, @phantom/browser-sdk, and DFlow spot trading and market-data streaming. Do NOT use for Ethereum or EVM wallet integrations, or non-DFlow DEX routing."
 license: MIT
 metadata:
   author: DFlow & Phantom Connect
@@ -29,29 +29,29 @@ Determine the domain, then route to the right references.
 **DFlow trading & market data:**
 
 - Spot token swaps (quote, sign, submit, confirm)
-- Live prices / order-book depth / priority-fee streaming
+- Live prices, order-book depth, or priority-fee streaming
 
-Many tasks combine both (e.g., a swap UI needs wallet connection AND DFlow trading). Read all relevant references before writing code.
+Many tasks combine both (for example, a swap UI needs wallet connection AND DFlow trading). Read all relevant references before writing code.
 
 ### Step 2: Read the Relevant References
 
 **Phantom Connect SDKs** (wallet connection, signing, auth):
 
-- `references/react-sdk.md` — React hooks, components, theming, PhantomProvider
-- `references/react-native-sdk.md` — Expo config, polyfills, deep links, mobile auth
-- `references/browser-sdk.md` — BrowserSDK init, events, wallet discovery, vanilla JS
+- `references/react-sdk.md`: React hooks, components, theming, PhantomProvider
+- `references/react-native-sdk.md`: Expo config, polyfills, deep links, mobile auth
+- `references/browser-sdk.md`: BrowserSDK init, events, wallet discovery, vanilla JS
 
 **Solana patterns** (transactions, gating, minting, payments):
 
-- `references/transactions.md` — SOL/SPL transfers, signing, fee estimation
-- `references/token-gating.md` — client-side and server-side token-gated access
-- `references/nft-minting.md` — mint pages, Metaplex Core, compressed NFTs
-- `references/payments.md` — SOL/USDC payments, checkout with backend verification
+- `references/transactions.md`: SOL/SPL transfers, signing, fee estimation
+- `references/token-gating.md`: client-side and server-side token-gated access
+- `references/nft-minting.md`: mint pages, Metaplex Core, compressed NFTs
+- `references/payments.md`: SOL/USDC payments, checkout with backend verification
 
 **DFlow** (swaps, streaming):
 
-- `references/dflow-crypto-trading.md` — spot swaps via `/order`: atomic units, base58 mints, quote-without-wallet, blockhash-confirm, broadcast paths, priority/platform/sponsor fees
-- `references/dflow-websockets.md` — real-time quote / order-book / priority-fee streaming (browser must proxy)
+- `references/dflow-crypto-trading.md`: spot swaps via `/order` (atomic units, base58 mints, quote-without-wallet, priority/platform/sponsor fees)
+- `references/dflow-websockets.md`: real-time quote, order-book, and priority-fee streaming (browser proxies through the backend)
 
 ### Step 3: Ask the Right Questions
 
@@ -64,8 +64,8 @@ Before implementing, ask questions based on the domain:
 
 **For DFlow tasks:**
 
-- Do you have a DFlow API key? (Yes → prod host + `x-api-key`; No → dev host, rate-limited. Prod key: pond.dflow.net/get-started/api-key.) It's one key for everything DFlow.
-- Client environment? (web, mobile, backend, CLI) — browser apps must proxy DFlow HTTP/WebSocket through a backend.
+- Do you have a DFlow API key? (Yes: prod host with `x-api-key`. No: dev host, rate-limited. Prod key: pond.dflow.net/get-started/api-key.) It's one key for everything DFlow.
+- Client environment? (web, mobile, backend, CLI) Browser apps keep the key on the backend and proxy DFlow HTTP and WebSocket through it.
 - Platform fees? If yes, what bps and which builder-owned fee account (which must already exist)?
 
 ### Step 4: Implement
@@ -78,9 +78,9 @@ Follow the patterns in the reference files. Key rules by domain:
 
 **DFlow:**
 
-- Trades are **synchronous** — one `/order` call returns a signed-ready transaction; sign, submit, and confirm. There is no async/`executionMode` flow.
-- **Browser apps must proxy** DFlow HTTP (`/order`, no CORS) and WebSocket streams (browsers can't set the `x-api-key` header) through their backend.
-- Dev endpoints (`dev-quote-api.dflow.net`) work without a key but are rate-limited; production requires a key from pond.dflow.net/get-started/api-key. Stream access is gated per key (separate from `/order`).
+- Trades are synchronous: one `/order` call returns a signed-ready transaction that you sign, submit, and confirm.
+- As a security best practice, keep the DFlow API key on the backend, not in browser code. Browser apps proxy DFlow HTTP (`/order` serves no CORS) and the WebSocket streams through their backend.
+- Dev endpoints (`dev-quote-api.dflow.net`) work without a key but are rate-limited; production requires a key from pond.dflow.net/get-started/api-key. In production, quote and book stream access is granted per key.
 
 ### Step 5: Handle Errors
 
@@ -88,8 +88,8 @@ Each reference file contains domain-specific error handling. Key cross-cutting c
 
 - User rejects a transaction or signature request
 - Wallet not connected when a signed action is attempted
-- DFlow API returns 429 (rate limited) — retry with backoff or get a production API key
-- `route_not_found` from DFlow — check amount units (must be atomic), check mint addresses, then liquidity
+- DFlow API returns 429 (rate limited): retry with backoff or get a production API key
+- `route_not_found` from DFlow: a likely cause is insufficient liquidity for the pair at that size; also check the mint addresses and that `amount` is in atomic units
 
 ## Examples
 
@@ -129,8 +129,8 @@ Actions:
 
 1. Ask: API key? Client environment? Platform fees?
 2. Read `references/dflow-crypto-trading.md`
-3. Use the `/order` flow: request the order (proxy through backend in a browser), deserialize, sign, submit, confirm
-4. In a browser, broadcast via `wallet.sendTransaction` (wallet's RPC); server-side, `sendRawTransaction` through your own RPC
+3. Use the `/order` flow: request the order (proxy through the backend in a browser), deserialize the returned transaction, sign, submit, and confirm
+4. In a browser, sign and send with the Phantom SDK (see `references/transactions.md`); server-side, sign with a keypair and submit through your RPC
 
 Result: Working swap with DFlow routing
 
@@ -142,9 +142,9 @@ Actions:
 
 1. Ask: which platform? API key? Platform fees?
 2. Read the relevant SDK reference AND `references/dflow-crypto-trading.md`
-3. Wire the wallet via Wallet-Standard auto-discovery (`wallets={[]}`), not per-wallet adapters
-4. Build the swap form; proxy `/order` through a backend (no CORS)
-5. Sign with the connected wallet and broadcast via `wallet.sendTransaction`
+3. Set up wallet connection with the Phantom SDK
+4. Build the swap form; proxy `/order` through the backend so the key stays server-side
+5. Sign and send with the Phantom SDK, then confirm
 
 Result: End-to-end swap page combining Phantom wallet and DFlow trading
 
@@ -155,9 +155,9 @@ User says: "Show a live order book for a token pair"
 Actions:
 
 1. Read `references/dflow-websockets.md`
-2. Stand up a backend relay that opens `/book-stream` with the `x-api-key` header and pipes frames to the browser (browsers can't set WS headers)
+2. Stand up a backend relay that holds the key, opens `/book-stream` with the `x-api-key` header, and relays frames to the browser
 3. Subscribe with `{ op: "subscribe", base_mint, quote_mint }`; render the batched per-slot `updates[]`
-4. Reconnect + re-subscribe on drop
+4. Reconnect and re-subscribe on drop
 
 Result: Live streaming order book, key kept server-side
 
@@ -170,4 +170,3 @@ Result: Live streaming order book, key kept server-side
 - DFlow MCP Server: pond.dflow.net/mcp
 - DFlow MCP Docs: pond.dflow.net/ai/mcp
 - DFlow Docs: pond.dflow.net/introduction
-- DFlow Cookbook: github.com/DFlowProtocol/cookbook

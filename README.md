@@ -104,7 +104,7 @@ For DFlow integrations:
 
 - Dev endpoints work without an API key but are rate-limited
 - [Apply for an API key](https://pond.dflow.net/get-started/api-key) before releasing to production
-- Market-data stream access is gated per API key (separate from `/order`) — request it from the DFlow team
+- In production, quote and book stream access is granted per key (separate from `/order`); request it from the DFlow team
 
 ## How the Skill Works
 
@@ -121,7 +121,6 @@ This keeps context usage efficient.
 - [Phantom MCP Server](https://docs.phantom.com/resources/mcp-server)
 - [DFlow MCP Server](https://pond.dflow.net/mcp)
 - [DFlow Docs](https://pond.dflow.net/introduction)
-- [DFlow Cookbook](https://github.com/DFlowProtocol/cookbook)
 
 ## Contributing
 
