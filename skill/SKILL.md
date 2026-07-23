@@ -1,11 +1,11 @@
 ---
 name: dflow-phantom-connect
-description: "Build Solana wallet-connected apps with Phantom Connect SDKs and DFlow trading. Use when user asks to connect a Phantom wallet, integrate Phantom in React, React Native, or vanilla JS, sign messages or transactions, build token-gated pages, mint NFTs, accept crypto payments, swap tokens with DFlow, trade prediction markets, or integrate Proof KYC verification. Covers @phantom/react-sdk, @phantom/react-native-sdk, @phantom/browser-sdk, DFlow spot trading, DFlow prediction markets, and DFlow Proof identity verification. Do NOT use for Ethereum or EVM wallet integrations, or non-DFlow DEX routing."
+description: "Build Solana wallet-connected apps with Phantom Connect SDKs and DFlow spot trading. Use when user asks to connect a Phantom wallet, integrate Phantom in React, React Native, or vanilla JS, sign messages or transactions, build token-gated pages, mint NFTs, accept crypto payments, or swap/stream tokens with DFlow. Covers @phantom/react-sdk, @phantom/react-native-sdk, @phantom/browser-sdk, and DFlow spot trading and market-data streaming. Do NOT use for Ethereum or EVM wallet integrations, or non-DFlow DEX routing."
 license: MIT
 metadata:
   author: DFlow & Phantom Connect
-  version: 1.0.0
-  tags: [solana, phantom, wallet, trading, prediction-markets, kyc]
+  version: 1.1.0
+  tags: [solana, phantom, wallet, trading, market-data]
   mcp-server: pond.dflow.net/mcp
 ---
 
@@ -26,35 +26,32 @@ Determine the domain, then route to the right references.
 - Crypto payments
 - Solana transfers (SOL or SPL tokens)
 
-**DFlow trading:**
+**DFlow trading & market data:**
 
-- Spot token swaps
-- Prediction market discovery, trading, and redemption
-- Proof KYC identity verification
+- Spot token swaps (quote, sign, submit, confirm)
+- Live prices, order-book depth, or priority-fee streaming
 
-Many tasks combine both (e.g., a swap UI needs wallet connection AND DFlow trading). Read all relevant references before writing code.
+Many tasks combine both (for example, a swap UI needs wallet connection AND DFlow trading). Read all relevant references before writing code.
 
 ### Step 2: Read the Relevant References
 
 **Phantom Connect SDKs** (wallet connection, signing, auth):
 
-- `references/react-sdk.md` — React hooks, components, theming, PhantomProvider
-- `references/react-native-sdk.md` — Expo config, polyfills, deep links, mobile auth
-- `references/browser-sdk.md` — BrowserSDK init, events, wallet discovery, vanilla JS
+- `references/react-sdk.md`: React hooks, components, theming, PhantomProvider
+- `references/react-native-sdk.md`: Expo config, polyfills, deep links, mobile auth
+- `references/browser-sdk.md`: BrowserSDK init, events, wallet discovery, vanilla JS
 
 **Solana patterns** (transactions, gating, minting, payments):
 
-- `references/transactions.md` — SOL/SPL transfers, signing, fee estimation
-- `references/token-gating.md` — client-side and server-side token-gated access
-- `references/nft-minting.md` — mint pages, Metaplex Core, compressed NFTs
-- `references/payments.md` — SOL/USDC payments, checkout with backend verification
+- `references/transactions.md`: SOL/SPL transfers, signing, fee estimation
+- `references/token-gating.md`: client-side and server-side token-gated access
+- `references/nft-minting.md`: mint pages, Metaplex Core, compressed NFTs
+- `references/payments.md`: SOL/USDC payments, checkout with backend verification
 
-**DFlow trading** (swaps, prediction markets, KYC):
+**DFlow** (swaps, streaming):
 
-- `references/dflow-crypto-trading.md` — spot token swaps, slippage, priority fees, platform fees
-- `references/dflow-prediction-markets.md` — market discovery, trading, redemption, maintenance windows, fee models
-- `references/dflow-websockets.md` — real-time price, trade, and orderbook streaming via WebSocket
-- `references/dflow-proof.md` — Proof KYC verification (required for prediction market trades, usable for any gated feature)
+- `references/dflow-crypto-trading.md`: spot swaps via `/order` (atomic units, base58 mints, quote-without-wallet, priority/platform/sponsor fees)
+- `references/dflow-websockets.md`: real-time quote, order-book, and priority-fee streaming (browser proxies through the backend)
 
 ### Step 3: Ask the Right Questions
 
@@ -65,18 +62,11 @@ Before implementing, ask questions based on the domain:
 - Which platform? (React, React Native, vanilla JS)
 - Do they need social login (Google/Apple) or extension only?
 
-**For DFlow spot trades:**
+**For DFlow tasks:**
 
-- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/get-started/api-key.
-- Platform fees? If yes, what bps and what fee account?
-- Client environment? (web, mobile, backend, CLI)
-
-**For DFlow prediction markets:**
-
-- Settlement mint? (USDC or CASH — these are the only two)
-- Dev or production endpoints? If production, remind them to apply for an API key at pond.dflow.net/get-started/api-key.
-- Platform fees? If yes, use `platformFeeScale` for dynamic fees.
-- Client environment? (web, mobile, backend, CLI)
+- Do you have a DFlow API key? (Yes: prod host with `x-api-key`. No: dev host, rate-limited. Prod key: pond.dflow.net/get-started/api-key.) It's one key for everything DFlow.
+- Client environment? (web, mobile, backend, CLI) Browser apps keep the key on the backend and proxy DFlow HTTP and WebSocket through it.
+- Platform fees? If yes, what bps and which builder-owned fee account (which must already exist)?
 
 ### Step 4: Implement
 
@@ -86,11 +76,11 @@ Follow the patterns in the reference files. Key rules by domain:
 
 - All SDK details (provider setup, hooks, components, auth providers) are in the SDK reference files. Read them before writing Phantom integration code.
 
-**DFlow Trading:**
+**DFlow:**
 
-- Dev endpoints (`dev-quote-api.dflow.net`, `dev-prediction-markets-api.dflow.net`, `wss://dev-prediction-markets-api.dflow.net/api/v1/ws`) work without an API key but are rate-limited. Production requires a key from pond.dflow.net/get-started/api-key.
-- Prediction market trades require Proof KYC before buying or selling outcome tokens. Browsing and discovery do not require KYC.
-- Prediction markets also require geoblocking for restricted jurisdictions.
+- Trades are synchronous: one `/order` call returns a signed-ready transaction that you sign, submit, and confirm.
+- As a security best practice, keep the DFlow API key on the backend, not in browser code. Browser apps proxy DFlow HTTP (`/order` serves no CORS) and the WebSocket streams through their backend.
+- Dev endpoints (`dev-quote-api.dflow.net`) work without a key but are rate-limited; production requires a key from pond.dflow.net/get-started/api-key. In production, quote and book stream access is granted per key.
 
 ### Step 5: Handle Errors
 
@@ -98,8 +88,8 @@ Each reference file contains domain-specific error handling. Key cross-cutting c
 
 - User rejects a transaction or signature request
 - Wallet not connected when a signed action is attempted
-- DFlow API returns 429 (rate limited) — retry with backoff or get a production API key
-- `route_not_found` from DFlow — check amount units (must be atomic), check liquidity, check mint addresses
+- DFlow API returns 429 (rate limited): retry with backoff or get a production API key
+- `route_not_found` from DFlow: a likely cause is insufficient liquidity for the pair at that size; also check the mint addresses and that `amount` is in atomic units
 
 ## Examples
 
@@ -137,40 +127,39 @@ User says: "Add a swap feature using DFlow"
 
 Actions:
 
-1. Ask: Platform fees? Client environment?
+1. Ask: API key? Client environment? Platform fees?
 2. Read `references/dflow-crypto-trading.md`
-3. Use the `/order` flow: request the order, sign, submit to RPC, confirm
-4. Connect wallet with Phantom, sign and submit transaction to Solana RPC
+3. Use the `/order` flow: request the order (proxy through the backend in a browser), deserialize the returned transaction, sign, submit, and confirm
+4. In a browser, sign and send with the Phantom SDK (see `references/transactions.md`); server-side, sign with a keypair and submit through your RPC
 
-Result: Working swap UI with DFlow routing
+Result: Working swap with DFlow routing
 
-### Example 4: Prediction market trade
-
-User says: "Let users buy YES/NO positions on prediction markets"
-
-Actions:
-
-1. Ask: settlement mint (USDC or CASH)? Platform fees? Client environment?
-2. Read `references/dflow-prediction-markets.md` and `references/dflow-proof.md`
-3. Build market discovery UI from Metadata API
-4. Gate trades behind Proof KYC verification
-5. Use /order endpoint to trade settlement mint into outcome tokens
-
-Result: Prediction market UI with KYC-gated trading
-
-### Example 5: Swap UI with wallet connection
+### Example 4: Full swap page with wallet connection
 
 User says: "Build a full swap page with wallet connect and DFlow"
 
 Actions:
 
-1. Ask: which platform? Platform fees?
+1. Ask: which platform? API key? Platform fees?
 2. Read the relevant SDK reference AND `references/dflow-crypto-trading.md`
-3. Set up wallet connection with Phantom
-4. Build swap form, proxy `/order` calls through backend
-5. Sign transaction with connected wallet, submit to RPC
+3. Set up wallet connection with the Phantom SDK
+4. Build the swap form; proxy `/order` through the backend so the key stays server-side
+5. Sign and send with the Phantom SDK, then confirm
 
 Result: End-to-end swap page combining Phantom wallet and DFlow trading
+
+### Example 5: Live order book
+
+User says: "Show a live order book for a token pair"
+
+Actions:
+
+1. Read `references/dflow-websockets.md`
+2. Stand up a backend relay that holds the key, opens `/book-stream` with the `x-api-key` header, and relays frames to the browser
+3. Subscribe with `{ op: "subscribe", base_mint, quote_mint }`; render the batched per-slot `updates[]`
+4. Reconnect and re-subscribe on drop
+
+Result: Live streaming order book, key kept server-side
 
 ## Resources
 
@@ -181,4 +170,3 @@ Result: End-to-end swap page combining Phantom wallet and DFlow trading
 - DFlow MCP Server: pond.dflow.net/mcp
 - DFlow MCP Docs: pond.dflow.net/ai/mcp
 - DFlow Docs: pond.dflow.net/introduction
-- DFlow Cookbook: github.com/DFlowProtocol/cookbook
